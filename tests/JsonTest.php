@@ -50,7 +50,7 @@ EOJSON;
 	}
 
 	public function testInvalidJsonInit() {
-		$this->setExpectedException('RuntimeException','Syntax error');
+		$this->setExpectedException('wwerther\Json\JsonException','Syntax error');
 		$ne=new Json($this->invalid_json);
 	}
 
