@@ -16,13 +16,13 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 
   /** @var array Containing error-strings in case json_encode/decode failed */
   protected static $_messages = array(
-        	JSON_ERROR_NONE => 'No error has occurred',
-        	JSON_ERROR_DEPTH => 'The maximum stack depth has been exceeded',
-        	JSON_ERROR_STATE_MISMATCH => 'Invalid or malformed JSON',
-        	JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
-        	JSON_ERROR_SYNTAX => 'Syntax error',
-        	JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'
-    	);
+			JSON_ERROR_NONE => 'No error has occurred',
+			JSON_ERROR_DEPTH => 'The maximum stack depth has been exceeded',
+			JSON_ERROR_STATE_MISMATCH => 'Invalid or malformed JSON',
+			JSON_ERROR_CTRL_CHAR => 'Control character error, possibly incorrectly encoded',
+			JSON_ERROR_SYNTAX => 'Syntax error',
+			JSON_ERROR_UTF8 => 'Malformed UTF-8 characters, possibly incorrectly encoded'
+		);
 
   /** @var array Contain the real "properties" of the json-object, including subordinated json-objects */
   private $data=array();
@@ -37,12 +37,12 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
   private $options=0;
 
   /**
-  * Constructor of the object, allowing different inputs for creation
-  *
-  * @param mixed $json The data/information that should be transformed to a json-object. Depending on the input type this might be
-  */
+   * Constructor of the object, allowing different inputs for creation
+   *
+   * @param mixed $json The data/information that should be transformed to a json-object. Depending on the input type this might be
+   */
   public function __construct($json=null) {
-        $this->position = 0;
+		$this->position = 0;
 		if (is_null($json)) return;
 		if ($json instanceof Json) {
 			$this->data=$json->data;
@@ -50,7 +50,7 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 		}
 		if (is_string($json)) {
 			$stdClass=self::decode($json);
-          return;
+		  return;
 		}
 		if (is_object($json)) {
 	#		print "construct: ".var_dump($json);
@@ -61,11 +61,11 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	}
 
 	private function __cast(\stdClass $object) {
-        	if (is_array($object) || is_object($object)) {
-            		foreach ($object as $key => $value) {
+			if (is_array($object) || is_object($object)) {
+					foreach ($object as $key => $value) {
 				# print "Key $key\n";
 				if (is_object($value)) {
-                			$this->data[$key] = new Json($value);
+							$this->data[$key] = new Json($value);
 				} elseif (is_array($value)) {
 				# print "$key\n";
 					$this->data[$key]=array_map(function($in) {
@@ -77,11 +77,11 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 								},$value);
 
 				} else {
-					$this->data[$key] = $value;
+					$this->data[$key]=$value;
 				}
-            		}
-        	}
-    	}
+					}
+			}
+		}
 
 	public function commit() {
 		$this->haschanged=false;
@@ -102,7 +102,7 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 		return $this->haschanged;
 	}
 
-	public function __set($name,$value) {
+	public function __set($name, $value) {
 	#	print "Setter for $name: $value\n";
 		# Would be great to do a check whether or not the "new" value is the same like the old value
 		# In that case I would keep haschanged to FALSE
@@ -111,7 +111,7 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	}
 	
 	public function &__get($name) {
-        	if (isset($this->data[$name])) {
+			if (isset($this->data[$name])) {
 			return $this->data[$name];
 		}
 		$this->data[$name]=new Json();
@@ -119,22 +119,22 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	}
 
 	public function __isset($name) 
-    	{
-        #	echo "Ist '$name' gesetzt?\n";
-        	return isset($this->data[$name]);
-    	}
+		{
+		#	echo "Ist '$name' gesetzt?\n";
+			return isset($this->data[$name]);
+		}
     
 	public function __unset($name)
-    	{
-       # 	echo "Lösche '$name'\n";
-        	unset($this->data[$name]);
+		{
+	   # 	echo "Lösche '$name'\n";
+			unset($this->data[$name]);
 		$this->haschanged=true;
-    	}
+		}
 
 	/**
-	*
-	* @return An Array that could be parsed by JSON_Encode
-	*/
+	 *
+	 * @return An Array that could be parsed by JSON_Encode
+	 */
 	public function jsonSerialize() {
 		$result=array();
 		foreach ($this->data as $key=>$value) {
@@ -164,23 +164,23 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	*
 	*/
 	public function __tostring() {
-		return self::encode($this,JSON_PRETTY_PRINT);
+		return self::encode($this, JSON_PRETTY_PRINT);
 	}
 
 	/**
 	* Encode Object to a Json-String (
 	*
-	* @param mixed $value
+	* @param Json $value
 	* @param int $options JSON_HEX_QUOT, JSON_HEX_TAG, JSON_HEX_AMP, JSON_HEX_APOS, JSON_NUMERIC_CHECK, JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES, JSON_FORCE_OBJECT, JSON_PRESERVE_ZERO_FRACTION, JSON_UNESCAPED_UNICODE (default 0)
 	* @param int $depth (default 512)
 	*
 	* @return string Containing a Json-String
 	* @throws wwerther\Json\JsonException Containing the error that was created while encoding the object to a json-string
 	*/
-    public static function encode($value,$options = 0,$depth=512) {
-      $result = json_encode($value, $options,$depth);
+    public static function encode($value, $options=0, $depth=512) {
+      $result=json_encode($value, $options, $depth);
 
-      if($result)  {
+      if ($result) {
         return $result;
       }
       throw new JsonException(static::$_messages[json_last_error()]);
@@ -192,15 +192,15 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
     * This function takes a string and decodes it using json_decode. So it is a wrapper around the builtin-function.
     * It returns the value generated by json_decode in case the decoding was successful. Otherwise it throws an RuntimeException
     *
-    * @param string $Json The Json-Text String to be parsed
+    * @param string $json The Json-Text String to be parsed
     * @param boolean $assoc decode json as assoc string?
     *
     * @return stdClass returns an object containing the decoded json-value
     * @throws wwerther\Json\JsonException Containing the error that was created while deconding the json-file
     */
-    public static function decode($json, $assoc = false) {
-      $result = json_decode($json, $assoc);
-      if($result) {
+    public static function decode($json, $assoc=false) {
+      $result=json_decode($json, $assoc);
+      if ($result) {
         return $result;
       }
       throw new JsonException(static::$_messages[json_last_error()]);
@@ -222,40 +222,40 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	
 	public function push($data) {
 		if ($data instanceof Json) {
-			$this->data=array_merge($this->data,$data->data());
+			$this->data=array_merge($this->data, $data->data());
 		} elseif (is_array($data)) {
-			$this->data=array_merge($this->data,$data);
+			$this->data=array_merge($this->data, $data);
 		} else {
 			$this->data[]=$data;
 		}
 	}
 
-    	public function offsetSet($offset, $value) {
-        	if (is_null($offset)) {
-            		$this->data[] = $value;
-        	} else {
-	    		# Would be great to do a check whether or not the "new" value is the same like the old value
-	    		# In that case I would keep haschanged to FALSE
-       			$this->data[$offset] = $value;
-        	}
+		public function offsetSet($offset, $value) {
+			if (is_null($offset)) {
+					$this->data[] = $value;
+			} else {
+				# Would be great to do a check whether or not the "new" value is the same like the old value
+				# In that case I would keep haschanged to FALSE
+	   			$this->data[$offset] = $value;
+			}
 		$this->haschanged=true;
-    	}
+		}
 
-    	public function offsetExists($offset) {
-	        return isset($this->data[$offset]);
-    	}
+		public function offsetExists($offset) {
+			return isset($this->data[$offset]);
+		}
 
-    	public function offsetUnset($offset) {
-        	unset($this->data[$offset]);
+		public function offsetUnset($offset) {
+			unset($this->data[$offset]);
 		$this->haschanged=true;
-    	}
+		}
 
-    	public function &offsetGet($offset) {
-	        return isset($this->data[$offset]) ? $this->data[$offset] : null;
-    	}
+		public function &offsetGet($offset) {
+			return isset($this->data[$offset]) ? $this->data[$offset] : null;
+		}
 
-    	public function getIterator() {
-    		return new \ArrayIterator($this->data);
-    	}
+		public function getIterator() {
+			return new \ArrayIterator($this->data);
+		}
 
 }
