@@ -1,7 +1,6 @@
 <?php
 
 use \wwerther\Json\Json;
-use \PHPUnit_Framework_TestCase;
 
 
 class JsonTest extends PHPUnit_Framework_TestCase

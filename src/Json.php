@@ -10,7 +10,14 @@
 * It's also possible to create new proerties directly on a "deeper" level.
 * Missing levels in between will be automatically generated.
 *
+* @TODO Fix the change-tracking functions for commit, rollback, haschanged
+*       Therefore the getter and setter methods need to be adjusted
 *
+* @property All-properties can be accessed by name and will be automatically 
+*          generated in the $data array. In case you access the property via
+*           -> operator you will get a new Json-Object (in case the property
+*           does not exists yet. In case you use the array operator a new array
+*           is spawned in the $data section
 */
 Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 
@@ -34,14 +41,11 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
       'created'=>array()
     );
 
-  /** @var int For the Iterator-Access to the Object */
-  private $position=0;
-
   /** @var boolean Track if the object has changed since last "commit" or not */
   private $haschanged=false;
 
   /** @var int Contains the options for converting the object to a string. At the moment this is unused */
-  private $options=0;
+  private $options=JSON_PRETTY_PRINT;
 
   /**
   * Constructor of the object, allowing different inputs for creation
@@ -49,7 +53,6 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
   * @param mixed $json The data/information that should be transformed to a json-object. Depending on the input type this might be
   */
   public function __construct($json=null) {
-    $this->position = 0;
     if (is_null($json)) return;
     if ($json instanceof Json) {
       $this->data=$json->data;
@@ -60,9 +63,20 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
     } else {
       $stdClass=self::decode($json);
     }
-    $this->cast($stdClass);		
+    $this->cast($stdClass);
   }
 
+  /**
+  * Define JSON-Encoding-Options for this object
+  * if Null
+  */
+  public function options($newoptions=null) {
+    if (isset($newoptions)) {
+      $this->options=$newoptions;
+    }
+    return $this->options;
+  }
+  
 	/**
     * Copy properties of a given object to ourself
     * 
@@ -264,7 +278,7 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	*
 	*/
 	public function __tostring() {
-		return self::encode($this,JSON_PRETTY_PRINT);
+		return self::encode($this,$this->options);
 	}
 
 // STATIC-METHODS
