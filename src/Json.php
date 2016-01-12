@@ -49,20 +49,19 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
   * @param mixed $json The data/information that should be transformed to a json-object. Depending on the input type this might be
   */
   public function __construct($json=null) {
-        	$this->position = 0;
-		if (is_null($json)) return;
-		if ($json instanceof Json) {
-			$this->data=$json->data;
-			return;
-		}
-		if (is_object($json)) {
-	#		print "construct: ".var_dump($json);
-			$stdClass=$json;
-		} else {
-			$stdClass=self::decode($json);
-		}
-		$this->cast($stdClass);		
-	}
+    $this->position = 0;
+    if (is_null($json)) return;
+    if ($json instanceof Json) {
+      $this->data=$json->data;
+      return;
+    }
+    if (is_object($json)) {
+      $stdClass=$json;
+    } else {
+      $stdClass=self::decode($json);
+    }
+    $this->cast($stdClass);		
+  }
 
 	/**
     * Copy properties of a given object to ourself
@@ -147,6 +146,8 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 		return $this->haschanged;
 	}
 
+// MAGIC METHODS for Right-Hand Property-Access
+	
 	public function __set($name,$value) {
 	#	print "Setter for $name: $value\n";
 		# Would be great to do a check whether or not the "new" value is the same like the old value
@@ -183,6 +184,50 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
       } 
     	}
 
+// MAGIC METHODS for Right-Hand Array-Access
+// INTERFACE ArrayAccess
+
+    public function offsetSet($offset, $value) {
+            # print "OS: $offset, ($value)\n";
+        	if (is_null($offset)) {
+              $this->data[] = $value;
+        	} else {
+	    		# Would be great to do a check whether or not the "new" value is the same like the old value
+	    		# In that case I would keep haschanged to FALSE
+       			$this->data[$offset] = $value;
+        	}
+		$this->haschanged=true;
+    	}
+
+    	public function offsetExists($offset) {
+	        return isset($this->data[$offset]);
+    	}
+
+    	public function offsetUnset($offset) {
+        	unset($this->data[$offset]);
+		$this->haschanged=true;
+    	}
+
+    	public function &offsetGet($offset) {
+            # print "OG: $offset\n";
+	        if (isset($this->data[$offset])) {
+              # print "Found\n";
+              return $this->data[$offset];
+            } else {
+              # print "Create\n";
+              $this->data[$offset]=array();
+              return $this->data[$offset];
+            };
+  }
+
+// INTERFACE ArrayIterator
+
+  public function getIterator() {
+    return new \ArrayIterator($this->data);
+  }
+
+// INTERFACE JsonSerializable
+
 	/**
 	*
 	* @return An Array that could be parsed by JSON_Encode
@@ -207,6 +252,9 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 		return $result;
 	}
 
+
+// Magic Method for getting a string-context of this object (using JSON-representation)
+
 	/** 
 	* Encode the Json-Object to a string
 	*
@@ -218,6 +266,9 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 	public function __tostring() {
 		return self::encode($this,JSON_PRETTY_PRINT);
 	}
+
+// STATIC-METHODS
+
 
 	/**
 	* Encode Object to a Json-String (
@@ -262,43 +313,5 @@ Class Json implements \ArrayAccess, \IteratorAggregate, \JsonSerializable {
 		#Seld\JsonLint\JsonParser
         	throw new \RuntimeException("Lint not implemented yet");
 	}
-
-
-    public function offsetSet($offset, $value) {
-            # print "OS: $offset, ($value)\n";
-        	if (is_null($offset)) {
-              $this->data[] = $value;
-        	} else {
-	    		# Would be great to do a check whether or not the "new" value is the same like the old value
-	    		# In that case I would keep haschanged to FALSE
-       			$this->data[$offset] = $value;
-        	}
-		$this->haschanged=true;
-    	}
-
-    	public function offsetExists($offset) {
-	        return isset($this->data[$offset]);
-    	}
-
-    	public function offsetUnset($offset) {
-        	unset($this->data[$offset]);
-		$this->haschanged=true;
-    	}
-
-    	public function &offsetGet($offset) {
-            # print "OG: $offset\n";
-	        if (isset($this->data[$offset])) {
-              # print "Found\n";
-              return $this->data[$offset];
-            } else {
-              # print "Create\n";
-              $this->data[$offset]=array();
-              return $this->data[$offset];
-            };
-    	}
-
-    	public function getIterator() {
-    		return new \ArrayIterator($this->data);
-    	}
 
 }
